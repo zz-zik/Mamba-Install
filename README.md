@@ -1,3 +1,5 @@
+# Linux服务器安装mamba
+
 前提条件，你已经成功安装 `cuda` 和 `cudnn` 根据最新的 `torch` 官方支持，仅支持 `cuda11.8 `、`cuda12.1 `、`cuda12.4 `、`cuda12.6 `，因此请勿安装其它版本的 `cuda`，这里我们以 `cuda12.1` 为例。
 
 ```bash
