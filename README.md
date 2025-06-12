@@ -1,6 +1,6 @@
 # Linux服务器安装mamba
 
-前提条件，你已经成功安装 `cuda` 和 `cudnn` 根据最新的 `torch` 官方支持，仅支持 `cuda11.8 `、`cuda12.1 `、`cuda12.4 `、`cuda12.6 `，因此请勿安装其它版本的 `cuda`，这里我们以 `cuda12.1` 为例。
+前提条件，你已经成功安装 `cuda` 和 `cudnn` 根据最新的 `torch` 官方支持，仅支持 `cuda11.8 `、`cuda12.1 `、`cuda12.4 `、`cuda12.6 `，因此请勿安装其它版本的 `cuda`，你也可以参考我们的安装示例，这里我们以 `cuda12.1` 为例。
 
 ```bash
 cuda12.1+cuDNN9.0+torch2.2+causal_conv1d-1.5.0.post7+mamba_ssm-2.2.4+selective_scan_cuda
@@ -450,5 +450,7 @@ python -c "import torch; print(torch.__version__, torch.version.cuda, torch.back
 ### 参考文章
 
 [Linux 环境下 Mamba 配置 - Tanxy](https://tanxy.club/2024/mamba_setup)
+
 [Linux 下安装 mamba-ssm 踩过的坑 | Vanilla_chan](https://vanilla-chan.cn/blog/2025/05/24/Linux%E4%B8%8B%E5%AE%89%E8%A3%85mamba-ssm%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91/)
+
 [AlwaysFHao/Mamba-Install: 本仓库旨在介绍如何通过源码编译的方法成功安装mamba，可解决selective_scan_cuda和本地cuda环境冲突的问题](https://github.com/AlwaysFHao/Mamba-Install)
