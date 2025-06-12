@@ -1,5 +1,3 @@
-# Linux服务器安装mamba
-
 前提条件，你已经成功安装 `cuda` 和 `cudnn` 根据最新的 `torch` 官方支持，仅支持 `cuda11.8 `、`cuda12.1 `、`cuda12.4 `、`cuda12.6 `，因此请勿安装其它版本的 `cuda`，这里我们以 `cuda12.1` 为例。
 
 ```bash
@@ -233,8 +231,8 @@ Mamba 模型介绍不在这里多说，此文主要讲 Mamba 环境的搭建。�
 
 如果使用官方安装的方式，则基本上都会出现问题。问题较为多样，但是归根到底是 `CUDA` 版本或者网络的问题，所以不推荐使用 `pip install` 进行，即使使用国内镜像源也会出错，因为在后面会有校验操作，结果还是安装不上。
 
-那么直接进入正题，这边强烈推荐使用 `.whl` 文件进行离线安装，可以很好地解决网络原因导致的安装问题。一开始尝试了以下搭配下载（根据自己的系统、软件版本信息下载，一般选择 `_abiTRUE`）并附上下载链接。
-### 1. 方法一
+那么直接进入正题，这边强烈推荐使用 `.whl` 文件进行离线安装，可以很好地解决网络原因导致的安装问题。如果 `whl` 包不能很好的解决问题，则需要使用方法三重头编译安装（编译安装时间比较久，取决于你的网络）。
+### 1. 方法一：在线安装
 
 找到相应的版本，复制安装地址，然后直接在服务器安装，这种方法适用于网络条件较好的情况。
 
@@ -243,7 +241,7 @@ pip install https://github.com/Dao-AILab/causal-conv1d/releases/download/v1.5.0.
 pip install https://github.com/state-spaces/mamba/releases/download/v2.2.4/mamba_ssm-2.2.4+cu12torch2.2cxx11abiTRUE-cp310-cp310-linux_x86_64.whl
 ```
 
-### 2. 方法二
+### 2. 方法二：离线安装
 
 如果服务器网络并不能直接访问 `github`，可以选择手动下载到本地后上传服务器，执行安装。
 
@@ -279,13 +277,13 @@ pip show mamba_ssm
 ```
 
 
-上述安装完成后，虽然安装并未报错，可能还会出现 `selective_scan_cuda` 找不到的情况，因此我们需要重新编译 `causal-conv1d` 即可。
+上述安装完成后，虽然安装并未报错，可能还会出现 `selective_scan_cuda` 找不到的情况，因此我们需要重新编译安装。
 
-### 3. 编译 `causal-conv1d`
+### 3. 方法三：编译安装
 
-从 [causal-conv1d](https://github.com/Dao-AILab/causal-conv1d) 拉取镜像到服务器
+#### 3.1 编译 `causal-conv1d`
 
-从 [MzeroMiko/VMamba](https://github.com/MzeroMiko/VMamba) 拉取镜像到服务器
+从 [causal-conv1d](https://github.com/Dao-AILab/causal-conv1d) 拉取镜像到服务器。
 
 ```bash
 git clone https://github.com/Dao-AILab/causal-conv1d.git
@@ -333,6 +331,59 @@ pip install .
 ```bash
 Successfully installed causal_conv1d-1.5.0.post8
 ```
+
+#### 3.2 编译 `mamba-ssm`
+
+从 [state-spaces/mamba: Mamba SSM architecture](https://github.com/state-spaces/mamba)拉取镜像到服务器。
+
+```bash
+git clone https://github.com/state-spaces/mamba.git
+```
+
+之后修改源码文件夹中 `setup.py` 文件，将
+
+```python
+# FORCE_BUILD: Force a fresh build locally, instead of attempting to find prebuilt wheels
+# SKIP_CUDA_BUILD: Intended to allow CI to use a simple `python setup.py sdist` run to copy over raw files, without any cuda compilation
+FORCE_BUILD = os.getenv("MAMBA_FORCE_BUILD", "FALSE") == "TRUE"
+SKIP_CUDA_BUILD = os.getenv("MAMBA_SKIP_CUDA_BUILD", "FALSE") == "TRUE"
+# For CI, we want the option to build with C++11 ABI since the nvcr images use C++11 ABI
+FORCE_CXX11_ABI = os.getenv("MAMBA_FORCE_CXX11_ABI", "FALSE") == "TRUE"
+```
+
+修改为
+
+```python
+FORCE_BUILD = True
+SKIP_CUDA_BUILD = False
+FORCE_CXX11_ABI = False
+```
+
+再将
+
+```python
+cmdclass={"bdist_wheel": CachedWheelsCommand, "build_ext": BuildExtension}
+```
+
+修改为
+
+```python
+cmdclass={"bdist_wheel": CachedWheelsCommand, 'build_ext': BuildExtension.with_options(use_ninja=False)}
+```
+
+最后切换到`mamba-ssm`源码目录下，通过以下命令进行编译安装：
+
+```shell
+pip install .
+```
+
+安装完成后出现
+
+```bash
+Successfully installed mamba_ssm-2.2.4
+```
+
+### 4. 验证安装
 
 为了验证是否安装成功，我们还需要依次执行下述命令：
 
